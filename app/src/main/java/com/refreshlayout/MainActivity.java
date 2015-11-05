@@ -10,8 +10,9 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.refreshlayout.adapter.RefreshLayoutAdapter;
-import com.refreshlayout.adapter.ViewHolder;
+import com.refreshlayoutview.RefreshLayoutView;
+import com.refreshlayoutview.adapter.RefreshLayoutAdapter;
+import com.refreshlayoutview.adapter.ViewHolder;
 
 import java.util.ArrayList;
 import java.util.List;

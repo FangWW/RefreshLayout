@@ -5,11 +5,11 @@
               android:fitsSystemWindows="true"
               android:orientation="vertical">
 
-    <com.refreshlayout.RefreshLayoutView
+    <com.refreshlayoutview.RefreshLayoutView
         android:id="@+id/rf_layout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"></com.refreshlayout.RefreshLayoutView>
+        android:layout_weight="1"></com.refreshlayoutview.RefreshLayoutView>
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/swiperefreshlayout"

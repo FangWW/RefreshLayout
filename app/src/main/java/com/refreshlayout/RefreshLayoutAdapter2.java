@@ -12,8 +12,8 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.refreshlayout.imp.OnPullListener;
-import com.refreshlayout.imp.OnPullListenered;
+import com.refreshlayoutview.imp.OnPullListener;
+import com.refreshlayoutview.imp.OnPullListenered;
 
 import java.util.List;
 
