@@ -1,7 +1,7 @@
 /*
  * mail:1065680448@qq.com
  */
-package com.refreshlayout.adapter;
+package com.refreshlayoutview.adapter;
 
 import android.util.SparseArray;
 import android.view.View;

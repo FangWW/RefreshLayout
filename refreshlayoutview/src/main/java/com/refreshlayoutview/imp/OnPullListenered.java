@@ -1,7 +1,7 @@
 /*
  * mail:1065680448@qq.com
  */
-package com.refreshlayout.imp;
+package com.refreshlayoutview.imp;
 
 import java.util.List;
 

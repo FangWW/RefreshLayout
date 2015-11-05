@@ -1,7 +1,7 @@
 /*
  * mail:1065680448@qq.com
  */
-package com.refreshlayout.adapter;
+package com.refreshlayoutview.adapter;
 
 import android.content.Context;
 import android.os.Handler;
@@ -12,8 +12,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 
-import com.refreshlayout.imp.OnPullListener;
-import com.refreshlayout.imp.OnPullListenered;
+import com.refreshlayoutview.imp.OnPullListener;
+import com.refreshlayoutview.imp.OnPullListenered;
 
 import java.util.List;
 

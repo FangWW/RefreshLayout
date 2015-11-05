@@ -1,7 +1,7 @@
 /*
  * mail:1065680448@qq.com
  */
-package com.refreshlayout;
+package com.refreshlayoutview;
 
 import android.content.Context;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -9,8 +9,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 
-import com.refreshlayout.imp.OnPullListener;
-import com.refreshlayout.imp.OnPullListenered;
+import com.refreshlayoutview.imp.OnPullListener;
+import com.refreshlayoutview.imp.OnPullListenered;
 
 import java.util.List;
 

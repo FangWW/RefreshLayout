@@ -1,7 +1,7 @@
 /*
  * mail:1065680448@qq.com
  */
-package com.refreshlayout.adapter;
+package com.refreshlayoutview.adapter;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
