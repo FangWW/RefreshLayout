@@ -64,11 +64,17 @@ public class MainActivity extends AppCompatActivity {
             public void onPullDownToRefresh() {
 
                 Log.e("ww", "刷新");
-                List<List> a = new ArrayList();
-                for (int i = 18 - 1; i >= 0; i--) {
+                final List<List> a = new ArrayList();
+                for (int i = 9; i >= 0; i--) {
                     a.add(new ArrayList());
                 }
-                postMsgDataRefreshed(a);
+
+                getWindow().getDecorView().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        postMsgDataRefreshed(a);
+                    }
+                }, 1500);
             }
 
             /**
@@ -78,12 +84,17 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPullUpToLoadMore(int page) {
 
-                Log.e("ww", "加载");
-                List<List> a = new ArrayList();
-                for (int i = 18 - 1; i >= 0; i--) {
+                Log.e("ww", "加载;page=" + page);
+                final List<List> a = new ArrayList();
+                for (int i = 9; i >= 0; i--) {
                     a.add(new ArrayList());
                 }
-                postMsgDataLoadedMore(a);
+                getWindow().getDecorView().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        postMsgDataLoadedMore(a);
+                    }
+                }, 1500);
             }
 
 
