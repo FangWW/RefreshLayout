@@ -10,8 +10,8 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.refreshlayoutview.RefreshLayoutAdapter;
 import com.refreshlayoutview.RefreshLayoutView;
-import com.refreshlayoutview.adapter.RefreshLayoutAdapter;
 import com.refreshlayoutview.adapter.ViewHolder;
 
 import java.util.ArrayList;
@@ -71,8 +71,12 @@ public class MainActivity extends AppCompatActivity {
                 postMsgDataRefreshed(a);
             }
 
+            /**
+             * 默认十页为分页   如果不是十的倍数就是最后一页
+             * @param page
+             */
             @Override
-            public void onPullUpToLoadMore() {
+            public void onPullUpToLoadMore(int page) {
 
                 Log.e("ww", "加载");
                 List<List> a = new ArrayList();
@@ -87,6 +91,13 @@ public class MainActivity extends AppCompatActivity {
             public void onBindViewHolder(ViewHolder holder, List item, int position) {
 
                 holder.getTextView(R.id.tv).setText("   RecyclerView   " + position + "===" + item);
+            }
+        });
+
+        getWindow().getDecorView().post(new Runnable() {
+            @Override
+            public void run() {
+                mRefreshLayoutView.onRefreshing();
             }
         });
 

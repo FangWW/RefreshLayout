@@ -7,7 +7,7 @@ version = "0.1"//修改
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.1"
+    buildToolsVersion '23.0.2'
 
     defaultConfig {
         minSdkVersion 16
@@ -30,4 +30,4 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:22.2.1'
 }
 
-apply from: "bintrayUpload.gradle"
+//apply from: "bintrayUpload.gradle"
