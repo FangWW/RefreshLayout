@@ -111,7 +111,8 @@ public class MainActivity extends AppCompatActivity {
                 mRefreshLayoutView.onRefreshing();
             }
         });
-
+//        mRefreshLayoutView.setEnabledUP(false);
+        mRefreshLayoutView.setEnabledDown(false);
 
 //        mRefreshLayoutView.setAdatper(new RefreshLayoutAdapter2<List>() {
 //            @Override

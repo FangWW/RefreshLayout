@@ -48,6 +48,9 @@ public class RefreshLayoutView extends SwipeRefreshLayout implements OnPullListe
      * 能否向上拉动
      */
     private boolean mIsCanUP = true;
+
+    private boolean mEnabledUP = true;
+    private boolean mEnabledDown = true;
     /**
      * 默认分页大小
      */
@@ -130,7 +133,7 @@ public class RefreshLayoutView extends SwipeRefreshLayout implements OnPullListe
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 if (mCurrentState == RecyclerView.SCROLL_STATE_DRAGGING || mCurrentState == RecyclerView.SCROLL_STATE_SETTLING) {
 
-                    if (dy < 0 || !mIsCanUP) {//向下滑动或者不能上拉
+                    if (!mEnabledUP || dy < 0 || !mIsCanUP) {//向下滑动或者不能上拉
                         //可以不处理，在SwipeRefreshLayout的onRefreshListener中实现下拉刷新
                     } else {//向上滑动
                         RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
@@ -138,7 +141,7 @@ public class RefreshLayoutView extends SwipeRefreshLayout implements OnPullListe
                             int lastitem = mLinearLayoutManager.findLastCompletelyVisibleItemPosition();
                             if (recyclerView.getAdapter().getItemCount() == lastitem + 1) {
                                 RefreshLayoutView.this.setRefreshing(true);
-                                RefreshLayoutView.this.setEnabled(false);
+                                RefreshLayoutView.this.setEnabled(false && mEnabledDown);
                                 if (mOnPullListener != null) {
                                     mOnPullListener.onPullUpToLoadMore(mOnPullListener.getPage());
                                 }
@@ -171,7 +174,7 @@ public class RefreshLayoutView extends SwipeRefreshLayout implements OnPullListe
 
     public void onRefreshing() {
         RefreshLayoutView.this.setRefreshing(true);
-        RefreshLayoutView.this.setEnabled(false);
+        RefreshLayoutView.this.setEnabled(false && mEnabledDown);
         if (mOnPullListener != null) {
             mOnPullListener.onPullDownToRefresh();
         }
@@ -179,7 +182,7 @@ public class RefreshLayoutView extends SwipeRefreshLayout implements OnPullListe
 
     public void onStopRefreshing() {
         RefreshLayoutView.this.setRefreshing(false);
-        RefreshLayoutView.this.setEnabled(true);
+        RefreshLayoutView.this.setEnabled(true && mEnabledDown);
     }
 
     /**
@@ -190,7 +193,7 @@ public class RefreshLayoutView extends SwipeRefreshLayout implements OnPullListe
         mRecyclerView.postDelayed(new Runnable() {
             @Override
             public void run() {
-                RefreshLayoutView.this.setEnabled(true);
+                RefreshLayoutView.this.setEnabled(true && mEnabledDown);
                 RefreshLayoutView.this.setRefreshing(false);
                 mIsCanUP = true;
                 if (mOnPullListener != null) {
@@ -206,6 +209,29 @@ public class RefreshLayoutView extends SwipeRefreshLayout implements OnPullListe
         }, 500);
     }
 
+    public boolean isEnabledUP() {
+        return mEnabledUP;
+    }
+
+    /**
+     * 能否上拉
+     */
+    public void setEnabledUP(boolean enabledUP) {
+        mEnabledUP = enabledUP;
+    }
+
+    public boolean isEnabledDown() {
+        return mEnabledDown;
+    }
+
+    /**
+     * 能否下拉
+     */
+    public void setEnabledDown(boolean enabledDown) {
+        mEnabledDown = enabledDown;
+        RefreshLayoutView.this.setEnabled(enabledDown);
+    }
+
     public void setDividerItemDecoration(DividerItemDecoration dividerItemDecoration) {
         mRecyclerView.addItemDecoration(dividerItemDecoration);
     }
@@ -215,7 +241,7 @@ public class RefreshLayoutView extends SwipeRefreshLayout implements OnPullListe
         mRecyclerView.postDelayed(new Runnable() {
             @Override
             public void run() {
-                RefreshLayoutView.this.setEnabled(true);
+                RefreshLayoutView.this.setEnabled(true && mEnabledDown);
                 RefreshLayoutView.this.setRefreshing(false);
                 if (mOnPullListener != null) {
                     mIsCanUP = dataList != null && dataList.size() == PAGE_SIZE;
