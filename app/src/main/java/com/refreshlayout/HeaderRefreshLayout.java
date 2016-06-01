@@ -98,7 +98,7 @@ public class HeaderRefreshLayout extends AppCompatActivity {
             @Override
             public void onPullUpToLoadMore(int page) {
 
-                Log.e("ww", "加载;page=" + page);
+                Log.e("ww", "加载;page=" + page + ";总共数据" + getDatas().size());
                 final List<List> a = new ArrayList();
                 for (int i = 9; i >= 0; i--) {
                     a.add(new ArrayList());
