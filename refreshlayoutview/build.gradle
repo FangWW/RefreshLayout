@@ -1,6 +1,6 @@
 apply plugin: 'com.android.library'
-apply plugin: 'com.github.dcendents.android-maven'
-apply plugin: 'com.jfrog.bintray'
+//apply plugin: 'com.github.dcendents.android-maven'
+//apply plugin: 'com.jfrog.bintray'
 
 
 version = "0.1"//修改
@@ -26,8 +26,8 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:23.1.0'
-    compile 'com.android.support:recyclerview-v7:22.2.1'
+    compile 'com.android.support:appcompat-v7:23.+'
+    compile 'com.android.support:recyclerview-v7:23.+'
 }
 
 //apply from: "bintrayUpload.gradle"

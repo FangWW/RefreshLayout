@@ -14,6 +14,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -30,7 +31,7 @@ import java.util.List;
 /**
  * 上拉更多  下拉刷新
  *
- * @Duthor FangJW
+ * @Author FangJW
  * @Date 15/11/3
  */
 public class RefreshLayoutView extends SwipeRefreshLayout implements OnPullListenered {
@@ -67,6 +68,7 @@ public class RefreshLayoutView extends SwipeRefreshLayout implements OnPullListe
      * 当前空视图
      */
     private View mEmptyView = null;
+    private int mHeight;
 
     public RefreshLayoutView(Context context) {
         super(context);
@@ -109,6 +111,24 @@ public class RefreshLayoutView extends SwipeRefreshLayout implements OnPullListe
         mCurrStateView.addView(mEmptyView);
         FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         rootLayout.addView(mCurrStateView, layoutParams);
+
+        //初始化状态视图
+        ViewTreeObserver vto = this.getViewTreeObserver();
+        vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                mHeight = RefreshLayoutView.this.getMeasuredHeight();
+//                mWidth = getMeasuredWidth();
+                if (mEmptyView != null) {
+                    mEmptyView.getLayoutParams().height = mHeight;
+                }
+                if (mErrorView != null) {
+                    mErrorView.getLayoutParams().height = mHeight;
+                }
+            }
+        });
+
 
         //设置RecyclerView
         mRecyclerView = new RecyclerView(mContext);
@@ -180,33 +200,45 @@ public class RefreshLayoutView extends SwipeRefreshLayout implements OnPullListe
         }
     }
 
+    public void onDelayedRefreshing() {
+        postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                onRefreshing();
+            }
+        }, 50);
+    }
+
     public void onStopRefreshing() {
         RefreshLayoutView.this.setRefreshing(false);
         RefreshLayoutView.this.setEnabled(true && mEnabledDown);
+        if (mOnPullListener.getDatas() == null || mOnPullListener.getDatas().isEmpty()) {
+            showErrorView();
+        }
     }
 
     /**
      * 供适配器回调
      */
     @Override
-    public void onPullDownToRefreshed(List dataList) {
+    public void onPullDownToRefreshed(List dataList, boolean isAutoView) {
         mRecyclerView.postDelayed(new Runnable() {
             @Override
             public void run() {
                 RefreshLayoutView.this.setEnabled(true && mEnabledDown);
                 RefreshLayoutView.this.setRefreshing(false);
                 mIsCanUP = true;
-                if (mOnPullListener != null) {
-                    if (mOnPullListener.getDatas() == null || mOnPullListener.getDatas().isEmpty()) {
-                        showEmptyView();
-                    } else if (mOnPullListener.getDatas() != null && !mOnPullListener.getDatas().isEmpty()) {
-                        showConetntView();
-                    } else if (mOnPullListener.getDatas() == null || mOnPullListener.getDatas().isEmpty()) {
-                        showErrorView();
-                    }
-                }
             }
         }, 500);
+        if (mOnPullListener != null && isAutoView) {
+            if (mOnPullListener.getDatas() == null || mOnPullListener.getDatas().isEmpty()) {
+                showEmptyView();
+            } else if (mOnPullListener.getDatas() != null && !mOnPullListener.getDatas().isEmpty()) {
+                showConetntView();
+            } else if (mOnPullListener.getDatas() == null || mOnPullListener.getDatas().isEmpty()) {
+                showErrorView();
+            }
+        }
     }
 
     public boolean isEnabledUP() {
@@ -251,21 +283,33 @@ public class RefreshLayoutView extends SwipeRefreshLayout implements OnPullListe
 
     }
 
-    private void showErrorView() {
-        mCurrStateView.removeAllViews();
-        mCurrStateView.addView(mErrorView);
-        mCurrStateView.setVisibility(VISIBLE);
-        mRecyclerView.setVisibility(GONE);
+    public void showErrorView() {
+        mEmptyView.post(new Runnable() {
+            @Override
+            public void run() {
+                mCurrStateView.removeAllViews();
+                mErrorView.getLayoutParams().height = mHeight;
+                mCurrStateView.addView(mErrorView);
+                mCurrStateView.setVisibility(VISIBLE);
+                mRecyclerView.setVisibility(GONE);
+            }
+        });
     }
 
-    private void showEmptyView() {
-        mCurrStateView.removeAllViews();
-        mCurrStateView.addView(mEmptyView);
-        mCurrStateView.setVisibility(VISIBLE);
-        mRecyclerView.setVisibility(GONE);
+    public void showEmptyView() {
+        mEmptyView.post(new Runnable() {
+            @Override
+            public void run() {
+                mCurrStateView.removeAllViews();
+                mEmptyView.getLayoutParams().height = mHeight;
+                mCurrStateView.addView(mEmptyView);
+                mCurrStateView.setVisibility(VISIBLE);
+                mRecyclerView.setVisibility(GONE);
+            }
+        });
     }
 
-    private void showConetntView() {
+    public void showConetntView() {
         mCurrStateView.setVisibility(GONE);
         mRecyclerView.setVisibility(VISIBLE);
     }
@@ -273,9 +317,11 @@ public class RefreshLayoutView extends SwipeRefreshLayout implements OnPullListe
     private View initErrorView() {
         if (mErrorView == null) {
             mErrorView = LayoutInflater.from(mContext).inflate(R.layout.layout_state_view, null);
+            mErrorView.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
             ImageView mImgMsg = (ImageView) mErrorView.findViewById(R.id.img_msg);
             TextView mTvMsg = (TextView) mErrorView.findViewById(R.id.tv_msg);
             mTvMsg.setText("error");
+            mImgMsg.setBackgroundResource(R.drawable.ic_error_network);
         }
         return mErrorView;
     }
@@ -286,6 +332,7 @@ public class RefreshLayoutView extends SwipeRefreshLayout implements OnPullListe
             ImageView mImgMsg = (ImageView) mEmptyView.findViewById(R.id.img_msg);
             TextView mTvMsg = (TextView) mEmptyView.findViewById(R.id.tv_msg);
             mTvMsg.setText("no data");
+            mImgMsg.setBackgroundResource(R.drawable.ic_error_no_result);
         }
         return mEmptyView;
     }
@@ -303,6 +350,7 @@ public class RefreshLayoutView extends SwipeRefreshLayout implements OnPullListe
             mImgMsg = (ImageView) mEmptyView.findViewById(R.id.img_msg);
             TextView mTvMsg = (TextView) mEmptyView.findViewById(R.id.tv_msg);
             mTvMsg.setText(msg);
+            mTvMsg.setVisibility(VISIBLE);
             mImgMsg.setBackgroundResource(imgRes);
         } catch (Exception e) {
             Log.e("ww", "你使用了自定义视图了~ 老夫找不到~");
@@ -315,13 +363,63 @@ public class RefreshLayoutView extends SwipeRefreshLayout implements OnPullListe
      * @param imgRes
      * @param msg
      */
-    private void setErrorView(@DrawableRes int imgRes, @StringRes int msg) {
-//        mErrorView = LayoutInflater.from(mContext).inflate(R.layout.layout_state_view, null);
+    public void setErrorView(@DrawableRes int imgRes, @StringRes int msg) {
         try {
             ImageView mImgMsg = (ImageView) mErrorView.findViewById(R.id.img_msg);
             TextView mTvMsg = (TextView) mErrorView.findViewById(R.id.tv_msg);
             mTvMsg.setText(msg);
+            mTvMsg.setVisibility(VISIBLE);
             mImgMsg.setBackgroundResource(imgRes);
+        } catch (Exception e) {
+            Log.e("ww", "你使用了自定义视图了~ 老夫找不到~");
+        }
+    }
+
+    /**
+     * 设置空视图
+     *
+     * @param imgRes
+     */
+    public void setEmptyView(@DrawableRes int imgRes) {
+        ImageView mImgMsg = null;
+        try {
+            mImgMsg = (ImageView) mEmptyView.findViewById(R.id.img_msg);
+            TextView mTvMsg = (TextView) mEmptyView.findViewById(R.id.tv_msg);
+            mTvMsg.setVisibility(GONE);
+            mImgMsg.setBackgroundResource(imgRes);
+        } catch (Exception e) {
+            Log.e("ww", "你使用了自定义视图了~ 老夫找不到~");
+        }
+    }
+
+    /**
+     * 设置错误视图
+     *
+     * @param imgRes
+     */
+    public void setErrorView(@DrawableRes int imgRes) {
+        try {
+            ImageView mImgMsg = (ImageView) mErrorView.findViewById(R.id.img_msg);
+            TextView mTvMsg = (TextView) mErrorView.findViewById(R.id.tv_msg);
+            mTvMsg.setVisibility(GONE);
+            mImgMsg.setBackgroundResource(imgRes);
+        } catch (Exception e) {
+            Log.e("ww", "你使用了自定义视图了~ 老夫找不到~");
+        }
+    }
+
+    /**
+     * 设置错误视图
+     *
+     * @param imgRes
+     */
+    public void setErrorView(@DrawableRes int imgRes, OnClickListener listener) {
+        try {
+            ImageView mImgMsg = (ImageView) mErrorView.findViewById(R.id.img_msg);
+            TextView mTvMsg = (TextView) mErrorView.findViewById(R.id.tv_msg);
+            mTvMsg.setVisibility(GONE);
+            mImgMsg.setBackgroundResource(imgRes);
+            mImgMsg.setOnClickListener(listener);
         } catch (Exception e) {
             Log.e("ww", "你使用了自定义视图了~ 老夫找不到~");
         }
@@ -369,5 +467,8 @@ public class RefreshLayoutView extends SwipeRefreshLayout implements OnPullListe
         }
     }
 
+    public RecyclerView getRecyclerView() {
+        return mRecyclerView;
+    }
 
 }

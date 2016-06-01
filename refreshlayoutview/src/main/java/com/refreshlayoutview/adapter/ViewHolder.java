@@ -10,7 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 /**
- * @Duthor FangJW
+ * @Author FangJW
  * @Date 15/11/4
  */
 public class ViewHolder {

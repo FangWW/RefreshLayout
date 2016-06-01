@@ -7,7 +7,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
 /**
- * @Duthor FangJW
+ * @Author FangJW
  * @Date 15/11/4
  */
 public class RVHolder extends RecyclerView.ViewHolder {

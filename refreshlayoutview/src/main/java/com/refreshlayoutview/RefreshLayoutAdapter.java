@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @Duthor FangJW
+ * @Author FangJW
  * @Date 15/11/4
  */
 public abstract class RefreshLayoutAdapter<T> extends RecyclerView.Adapter<RVHolder> implements OnPullListener {
@@ -32,6 +32,8 @@ public abstract class RefreshLayoutAdapter<T> extends RecyclerView.Adapter<RVHol
 
     public final int MSG_DATAREFRESHED = 1;
     public final int MSG_DATALOADEDMORE = 2;
+
+    private boolean isAutoView = true;
 
     /**
      * 加载item类型
@@ -52,20 +54,25 @@ public abstract class RefreshLayoutAdapter<T> extends RecyclerView.Adapter<RVHol
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             final int what = msg.what;
-            final List<T> datas = (List<T>) msg.obj;
+            final List<T> temp = (List<T>) msg.obj;
+            final List<T> datas = temp == null ? null : new ArrayList<>(temp);
             switch (what) {
                 case MSG_DATAREFRESHED:
                     mPage = 2;
                     mDatas.clear();
-                    mDatas.addAll(datas);
+                    if (datas != null) {
+                        mDatas.addAll(datas);
+                    }
                     if (mOnPullListenered != null) {
-                        mOnPullListenered.onPullDownToRefreshed(datas);
+                        mOnPullListenered.onPullDownToRefreshed(datas, isAutoView);
                     }
                     notifyDataSetChanged();
                     break;
                 case MSG_DATALOADEDMORE:
                     mPage++;
-                    mDatas.addAll(datas);
+                    if (datas != null) {
+                        mDatas.addAll(datas);
+                    }
                     if (mOnPullListenered != null) {
                         mOnPullListenered.onPullUpToLoadMoreed(datas);
                     }
@@ -77,8 +84,16 @@ public abstract class RefreshLayoutAdapter<T> extends RecyclerView.Adapter<RVHol
         }
     };
 
+    public void setAutoView(boolean autoView) {
+        isAutoView = autoView;
+    }
+
     public List<T> getDatas() {
         return mDatas;
+    }
+
+    public void add(T t) {
+        this.mDatas.add(t);
     }
 
     public int getPage() {
@@ -96,6 +111,18 @@ public abstract class RefreshLayoutAdapter<T> extends RecyclerView.Adapter<RVHol
         this.mViewHeader = viewHeader;
     }
 
+    public void add(T t, int position) {
+        this.mDatas.add(position, t);
+    }
+
+    public void remove(int position) {
+        this.mDatas.remove(position);
+    }
+
+    public void removeAll() {
+        this.mDatas.clear();
+    }
+
     @Override
     public int getItemCount() {
         int count = mDatas == null ? 0 : mDatas.size();
@@ -105,18 +132,9 @@ public abstract class RefreshLayoutAdapter<T> extends RecyclerView.Adapter<RVHol
         return count;
     }
 
-    /**
-     * 刷新
-     */
     @Override
     public abstract void onPullDownToRefresh();
 
-    /**
-     * 下一次的页数
-     * 默认十页为分页   如果不是十的倍数就是最后一页
-     *
-     * @param pager 当前第几页
-     */
     @Override
     public abstract void onPullUpToLoadMore(int pager);
 
@@ -174,6 +192,14 @@ public abstract class RefreshLayoutAdapter<T> extends RecyclerView.Adapter<RVHol
                 }
             });
         }
+        if (onItemLongClickListener != null) {
+            holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    return onItemLongClickListener.onItemLongClick(null, v, holder.getPosition(), holder.getItemId());
+                }
+            });
+        }
 
     }
 
@@ -190,11 +216,15 @@ public abstract class RefreshLayoutAdapter<T> extends RecyclerView.Adapter<RVHol
 
     private AdapterView.OnItemClickListener onItemClickListener;
 
-    public AdapterView.OnItemClickListener getOnItemClickListener() {
-        return onItemClickListener;
-    }
+    private AdapterView.OnItemLongClickListener onItemLongClickListener;
 
     public void setOnItemClickListener(AdapterView.OnItemClickListener onItemClickListener) {
         this.onItemClickListener = onItemClickListener;
     }
+
+    public void setOnItemLongClickListener(AdapterView.OnItemLongClickListener onItemLongClickListener) {
+        this.onItemLongClickListener = onItemLongClickListener;
+    }
+
+
 }
