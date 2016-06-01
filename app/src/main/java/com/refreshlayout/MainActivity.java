@@ -8,6 +8,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.refreshlayoutview.RefreshLayoutAdapter;
@@ -105,39 +107,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        getWindow().getDecorView().post(new Runnable() {
+        getWindow().getDecorView().postDelayed(new Runnable() {
             @Override
             public void run() {
                 mRefreshLayoutView.onRefreshing();
             }
-        });
-//        mRefreshLayoutView.setEnabledUP(false);
-        mRefreshLayoutView.setEnabledDown(false);
-
-//        mRefreshLayoutView.setAdatper(new RefreshLayoutAdapter2<List>() {
-//            @Override
-//            public void onPullDownToRefresh() {
-//                Log.e("ww", "刷新");
-//                List<List> a = new ArrayList();
-//                for (int i = 18 - 1; i >= 0; i--) {
-//                    a.add(new ArrayList());
-//                }
-//                postMsgDataRefreshed(a);
-//            }
-//
-//            @Override
-//            public void onPullUpToLoadMore() {
-//                Log.e("ww", "加载");
-//                List<List> a = new ArrayList();
-//                for (int i = 18 - 1; i >= 0; i--) {
-//                    a.add(new ArrayList());
-//                }
-//                postMsgDataLoadedMore(a);
-//
-//            }
-//
-//
-//        });
+        }, 1);
+        mRefreshLayoutView.setEnabledUP(true);
+        mRefreshLayoutView.setEnabledDown(true);
 
 
         swiperefreshlayout.setColorSchemeResources(android.R.color.holo_red_dark, android.R.color.holo_green_dark,
@@ -206,4 +183,19 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_share) {
+            HeaderRefreshLayout.gotoHere(this);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 }
