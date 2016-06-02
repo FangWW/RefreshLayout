@@ -1,11 +1,11 @@
 # RefreshLayout
 RecyclerView SwipeRefreshLayout下拉刷新上拉更多 + 简写万能adapter + 增加自定义headview
 
-![github](https://raw.githubusercontent.com/FangWW/RefreshLayout/master/app/github%20refreshlayout.png "github")
-
 #### onPullDownToRefresh()上拉刷新回调
 #### onPullUpToLoadMore(int page)下拉刷新回调 page自动增加1  默认10行一页
 #### RVHolder extends RecyclerView.ViewHolder 简写适配器(原作者没找到了== 知道的告诉我一下 谢谢~)
+
+![github](https://raw.githubusercontent.com/FangWW/RefreshLayout/master/app/github%20refreshlayout.png "github")
       
 ###  不带headerview
       new RefreshLayoutAdapter<List>(this, R.layout.recycleritem_layout)
