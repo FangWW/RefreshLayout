@@ -1,6 +1,10 @@
 # RefreshLayout
 RecyclerView SwipeRefreshLayout下拉刷新上拉更多 + 简写万能adapter + 增加自定义headview
 
+
+#### onPullDownToRefresh()上拉刷新回调
+#### onPullUpToLoadMore(int page)下拉刷新回调 page自动增加1  默认10行一页
+#### RVHolder extends RecyclerView.ViewHolder 简写适配器(原作者没找到了== 知道的告诉我一下 谢谢~)
       
 ###  不带headerview
       new RefreshLayoutAdapter<List>(this, R.layout.recycleritem_layout)
@@ -32,3 +36,8 @@ RecyclerView SwipeRefreshLayout下拉刷新上拉更多 + 简写万能adapter + 
       
 ###  加载传递数据
       postMsgDataLoadedMore(list);
+      
+###  使用的第三方库 谢谢~
+    compile 'com.jakewharton:butterknife:7.0.1'
+    compile 'com.bigkoo:convenientbanner:2.0.5'
+    compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
