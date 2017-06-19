@@ -1,6 +1,9 @@
 # RefreshLayout
 RecyclerView SwipeRefreshLayout下拉刷新上拉更多 + 简写万能adapter + 增加自定义headview
 
+###  使用方式
+    compile 'com.w.support:refreshlayout-view:1.0'
+
 #### onPullDownToRefresh()上拉刷新回调
 #### onPullUpToLoadMore(int page)下拉刷新回调 page自动增加1  默认10行一页
 #### RVHolder extends RecyclerView.ViewHolder 简写适配器(原作者没找到了== 知道的告诉我一下 谢谢~)
