@@ -3,6 +3,12 @@ RecyclerView SwipeRefreshLayout下拉刷新上拉更多 + 简写万能adapter + 
 
 ###  使用方式
     compile 'com.w.support:refreshlayout-view:1.0'
+    
+###  XML
+    <com.refreshlayoutview.RefreshLayoutView
+        android:id="@+id/rf_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
 #### onPullDownToRefresh()上拉刷新回调
 #### onPullUpToLoadMore(int page)下拉刷新回调 page自动增加1  默认10行一页
