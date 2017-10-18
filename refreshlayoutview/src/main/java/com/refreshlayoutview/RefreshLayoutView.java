@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.animation.OvershootInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -26,6 +27,8 @@ import com.refreshlayoutview.imp.OnPullListener;
 import com.refreshlayoutview.imp.OnPullListenered;
 
 import java.util.List;
+
+import jp.wasabeef.recyclerview.adapters.SlideInBottomAnimationAdapter;
 
 
 /**
@@ -48,14 +51,15 @@ public class RefreshLayoutView extends SwipeRefreshLayout implements OnPullListe
     /**
      * 能否向上拉动
      */
-    private boolean mIsCanUP = true;
+    private volatile boolean mIsCanUP = true;
 
     private boolean mEnabledUP = true;
     private boolean mEnabledDown = true;
     /**
      * 默认分页大小
      */
-    public static final int PAGE_SIZE = 10;
+    public static final int PAGE_SIZE = 20;
+    private int mPageSize = PAGE_SIZE;
     /**
      * 当前显示状态视图
      */
@@ -161,7 +165,8 @@ public class RefreshLayoutView extends SwipeRefreshLayout implements OnPullListe
                             int lastitem = mLinearLayoutManager.findLastCompletelyVisibleItemPosition();
                             if (recyclerView.getAdapter().getItemCount() == lastitem + 1) {
                                 RefreshLayoutView.this.setRefreshing(true);
-                                RefreshLayoutView.this.setEnabled(false && mEnabledDown);
+                                mIsCanUP = false;
+//                                RefreshLayoutView.this.setEnabled(false && mEnabledDown);
                                 if (mOnPullListener != null) {
                                     mOnPullListener.onPullUpToLoadMore(mOnPullListener.getPage());
                                 }
@@ -194,7 +199,7 @@ public class RefreshLayoutView extends SwipeRefreshLayout implements OnPullListe
 
     public void onRefreshing() {
         RefreshLayoutView.this.setRefreshing(true);
-        RefreshLayoutView.this.setEnabled(false && mEnabledDown);
+//        RefreshLayoutView.this.setEnabled(false && mEnabledDown);
         if (mOnPullListener != null) {
             mOnPullListener.onPullDownToRefresh();
         }
@@ -221,13 +226,16 @@ public class RefreshLayoutView extends SwipeRefreshLayout implements OnPullListe
      * 供适配器回调
      */
     @Override
-    public void onPullDownToRefreshed(List dataList, boolean isAutoView) {
+    public void onPullDownToRefreshed(final List dataList, boolean isAutoView) {
         mRecyclerView.postDelayed(new Runnable() {
             @Override
             public void run() {
                 RefreshLayoutView.this.setEnabled(true && mEnabledDown);
                 RefreshLayoutView.this.setRefreshing(false);
-                mIsCanUP = true;
+                if (mOnPullListener != null) {
+                    mIsCanUP = dataList != null && dataList.size() == mPageSize;
+                }
+//                mIsCanUP = true;
             }
         }, 500);
         if (mOnPullListener != null && isAutoView) {
@@ -276,11 +284,16 @@ public class RefreshLayoutView extends SwipeRefreshLayout implements OnPullListe
                 RefreshLayoutView.this.setEnabled(true && mEnabledDown);
                 RefreshLayoutView.this.setRefreshing(false);
                 if (mOnPullListener != null) {
-                    mIsCanUP = dataList != null && dataList.size() == PAGE_SIZE;
+                    mIsCanUP = dataList != null && dataList.size() == mPageSize;
                 }
             }
         }, 500);
 
+    }
+
+
+    public void setPageSize(int pageSize) {
+        mPageSize = pageSize;
     }
 
     public void showErrorView() {
@@ -458,7 +471,12 @@ public class RefreshLayoutView extends SwipeRefreshLayout implements OnPullListe
 
     public void setAdatper(RecyclerView.Adapter adapter) {
         if (mRecyclerView != null) {
-            mRecyclerView.setAdapter(adapter);
+            SlideInBottomAnimationAdapter alphaAdapter = new SlideInBottomAnimationAdapter(adapter);
+//            ScaleInAnimationAdapter alphaAdapter = new ScaleInAnimationAdapter(adapter);
+            alphaAdapter.setFirstOnly(true);
+            alphaAdapter.setDuration(600);
+            alphaAdapter.setInterpolator(new OvershootInterpolator(.5f));
+            mRecyclerView.setAdapter(alphaAdapter);
             if (adapter instanceof OnPullListener) {
                 OnPullListener onPullListener = (OnPullListener) adapter;
                 setOnPullListener(onPullListener);

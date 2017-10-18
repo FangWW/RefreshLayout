@@ -71,7 +71,7 @@ public class HeaderRefreshLayout extends AppCompatActivity {
 
         LinearLayout headerView = (LinearLayout) inflater.inflate(R.layout.layout_head, null);
         initCycleView(headerView);
-
+        mRefreshLayoutView.setPageSize(10);
         //添加 header
         mRefreshLayoutView.setAdatper(new RefreshLayoutAdapter<List>(this, R.layout.recycleritem_layout, headerView) {
             @Override
@@ -88,7 +88,7 @@ public class HeaderRefreshLayout extends AppCompatActivity {
                     public void run() {
                         postMsgDataRefreshed(a);
                     }
-                }, 1500);
+                }, 5500);
             }
 
             /**
@@ -108,7 +108,7 @@ public class HeaderRefreshLayout extends AppCompatActivity {
                     public void run() {
                         postMsgDataLoadedMore(a);
                     }
-                }, 1500);
+                }, 5500);
             }
 
 

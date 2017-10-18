@@ -15,7 +15,10 @@ RecyclerView SwipeRefreshLayout下拉刷新上拉更多 + 简写万能adapter + 
 #### RVHolder extends RecyclerView.ViewHolder 简写适配器(原作者没找到了== 知道的告诉我一下 谢谢~)
 
 ![github](https://raw.githubusercontent.com/FangWW/RefreshLayout/master/app/github%20refreshlayout.png "github")
-      
+
+###  设置分页大小(当服务端返回数量不等于pagesize时不能上拉)
+      setPageSize(int pageSize)
+
 ###  不带headerview
       new RefreshLayoutAdapter<List>(this, R.layout.recycleritem_layout)
 
