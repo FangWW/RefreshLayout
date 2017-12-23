@@ -1,82 +1,54 @@
 package com.refreshlayout;
 
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.google.gson.Gson;
+import com.refreshlayout.bean.OnePictureDetail;
+import com.refreshlayout.bean.OnePictureList;
+import com.refreshlayout.util.IConfig;
 import com.refreshlayoutview.RefreshLayoutAdapter;
 import com.refreshlayoutview.RefreshLayoutView;
 import com.refreshlayoutview.adapter.ViewHolder;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
-
     public static final String TAG = MainActivity.class.getSimpleName();
-
-    @Bind(R.id.recycleview)
-    RecyclerView recycleview;
-    @Bind(R.id.swiperefreshlayout)
-    SwipeRefreshLayout swiperefreshlayout;
-
     @Bind(R.id.rf_layout)
     RefreshLayoutView mRefreshLayoutView;
-
-    private RecyclerViewAdapter mAdapter = null;
-
-    /**
-     * 请求成功
-     */
-    public static final int REQUEST_SUCCESS = 100;
-
-    private Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MainActivity.REQUEST_SUCCESS:
-                    Toast.makeText(MainActivity.this, "请求数据成功！！", Toast.LENGTH_SHORT).show();
-                    swiperefreshlayout.setRefreshing(false);
-                    swiperefreshlayout.setEnabled(true);
-                    break;
-            }
-        }
-    };
+    private OkHttpClient okHttpClient;
+    private RefreshLayoutAdapter<OnePictureDetail.DataEntity> mRefreshLayoutAdapter;
+    List<OnePictureDetail.DataEntity> mReadShareDatas = new ArrayList<>();
+    private Gson gson;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         ButterKnife.bind(this);
-
-        mRefreshLayoutView.setAdatper(new RefreshLayoutAdapter<List>(this, R.layout.recycleritem_layout) {
+        ImgRequest.initImgRequest(this);
+        okHttpClient = new OkHttpClient();
+        gson = new Gson();
+        mRefreshLayoutAdapter = new RefreshLayoutAdapter<OnePictureDetail.DataEntity>(this, R.layout.layout_one) {
             @Override
             public void onPullDownToRefresh() {
-
-                Log.e("ww", "刷新");
-                final List<List> a = new ArrayList();
-                for (int i = 9; i >= 0; i--) {
-                    a.add(new ArrayList());
-                }
-
-                getWindow().getDecorView().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        postMsgDataRefreshed(a);
-                    }
-                }, 1500);
+                getOneListData("0", true);
             }
 
             /**
@@ -85,28 +57,30 @@ public class MainActivity extends AppCompatActivity {
              */
             @Override
             public void onPullUpToLoadMore(int page) {
-
-                Log.e("ww", "加载;page=" + page);
-                final List<List> a = new ArrayList();
-                for (int i = 9; i >= 0; i--) {
-                    a.add(new ArrayList());
+                try {
+                    getOneListData(mRefreshLayoutAdapter.getDatas().get(mRefreshLayoutAdapter.getDatas().size() - 1).getHpcontent_id(), false);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-                getWindow().getDecorView().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        postMsgDataLoadedMore(a);
-                    }
-                }, 1500);
             }
 
 
             @Override
-            public void onBindViewHolder(ViewHolder holder, List item, int position) {
-
-                holder.getTextView(R.id.tv).setText("   RecyclerView   " + position + "===" + item);
+            public void onBindViewHolder(final ViewHolder holder, final OnePictureDetail.DataEntity item, int position) {
+                final ImageView mIvImg = (ImageView) holder.get(R.id.iv_img);
+                final TextView mTvTitle = (TextView) holder.get(R.id.tv_title);
+                ImgRequest.inTo(mIvImg, item.getHp_img_url(), null);
+                mTvTitle.setText(item.getHp_title());
+                mIvImg.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        OneDetailActivity.gotoHere(MainActivity.this, item, mIvImg, (TextView) holder.get(R.id.tv_bg));
+                    }
+                });
             }
-        });
-
+        };
+        mRefreshLayoutView.setAdatper(mRefreshLayoutAdapter);
+        mRefreshLayoutView.setPageSize(10);
         getWindow().getDecorView().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -115,70 +89,74 @@ public class MainActivity extends AppCompatActivity {
         }, 1);
         mRefreshLayoutView.setEnabledUP(true);
         mRefreshLayoutView.setEnabledDown(true);
+    }
 
-
-        swiperefreshlayout.setColorSchemeResources(android.R.color.holo_red_dark, android.R.color.holo_green_dark,
-                android.R.color.holo_blue_light, android.R.color.holo_orange_dark);
-
-        //设置RecyclerView
-        final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        recycleview.setHasFixedSize(true);
-        recycleview.setLayoutManager(linearLayoutManager);
-        mAdapter = new RecyclerViewAdapter(this);
-
-        mAdapter.setmOnItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
+    private void getOneListData(String id, final boolean isRefresh) {
+        Request request = new Request.Builder()
+                .url(String.format(IConfig.ONE_PICTURE_URL, id))
+                .build();
+        Call call = okHttpClient.newCall(request);
+        call.enqueue(new Callback() {
             @Override
-            public void click(int position) {
-                Toast.makeText(MainActivity.this, "Click item Postion :  " + position, Toast.LENGTH_SHORT).show();
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
             }
-        });
-
-        recycleview.setAdapter(mAdapter);
-
-        swiperefreshlayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                swiperefreshlayout.setRefreshing(true);
-                swiperefreshlayout.setEnabled(false);
-                //模拟发请求 5秒延迟
-                mHandler.sendEmptyMessageDelayed(REQUEST_SUCCESS, 5000);
-            }
-        });
-
-        recycleview.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            private int mCurrentState = RecyclerView.SCROLL_STATE_IDLE;
-
-            private int lastdy = 0;
 
             @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                if (mCurrentState == RecyclerView.SCROLL_STATE_DRAGGING || mCurrentState == RecyclerView.SCROLL_STATE_SETTLING) {
-
-                    if (dy < 0) {//向下滑动
-                        //可以不处理，在SwipeRefreshLayout的onRefreshListener中实现下拉刷新
-                    } else {//向上滑动
-                        RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
-                        if (layoutManager instanceof LinearLayoutManager) {
-                            int lastitem = linearLayoutManager.findLastCompletelyVisibleItemPosition();
-                            if (recyclerView.getAdapter().getItemCount() == lastitem + 1) {
-                                swiperefreshlayout.setRefreshing(true);
-                                swiperefreshlayout.setEnabled(false);
-                                //模拟发请求 5秒延迟
-                                mHandler.sendEmptyMessageDelayed(REQUEST_SUCCESS, 5000);
-                            }
-                        }
+            public void onResponse(Call call, Response response) throws IOException {
+                try {
+                    String responseText = response.body().string();
+                    OnePictureList onePictureList = gson.fromJson(responseText, OnePictureList.class);
+                    final List<String> data = onePictureList.getData();
+                    if (data != null && !data.isEmpty()) {
+                        getOneDetails(data, isRefresh);
                     }
-
-                    lastdy = dy;
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-                super.onScrolled(recyclerView, dx, dy);
+            }
+        });
+
+
+    }
+
+    private void getOneDetails(final List<String> datas, final boolean isRefresh) {
+        okHttpClient = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url(String.format(IConfig.ONE_PICTURE_DETAIL_URL, datas.get(0)))
+                .build();
+        Call call = okHttpClient.newCall(request);
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
             }
 
             @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                mCurrentState = newState;
-                super.onScrollStateChanged(recyclerView, newState);
+            public void onResponse(Call call, Response response) throws IOException {
+                try {
+                    //数据
+                    String responseText = response.body().string();
+                    //Gson解析
+                    OnePictureDetail onePictureDetail = gson.fromJson(responseText, OnePictureDetail.class);
+                    final OnePictureDetail.DataEntity one = onePictureDetail.getData();
+                    if (one != null) {
+                        mReadShareDatas.add(one);
+                    }
+                    if (datas.size() == 1) {
+                        if (isRefresh) {
+                            mRefreshLayoutAdapter.postMsgDataRefreshed(new ArrayList<>(mReadShareDatas));
+                        } else {
+                            mRefreshLayoutAdapter.postMsgDataLoadedMore(new ArrayList<>(mReadShareDatas));
+                        }
+                        mReadShareDatas.clear();
+                    } else {
+                        datas.remove(0);
+                        getOneDetails(datas, isRefresh);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
