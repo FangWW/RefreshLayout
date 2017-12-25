@@ -20,11 +20,11 @@ RecyclerView SwipeRefreshLayout下拉刷新上拉更多 + 简写万能adapter + 
 #### onPullUpToLoadMore(int page)下拉刷新回调 page自动增加1  默认10行一页
 #### RVHolder extends RecyclerView.ViewHolder 简写适配器(原作者没找到了== 知道的告诉我一下 谢谢~)
 
-⬇⬇⬇此处有图片(3.5)加载慢⬇⬇⬇
+⬇⬇⬇此处有图片(3.5M)加载慢⬇⬇⬇
 
 ![github](https://raw.githubusercontent.com/FangWW/RefreshLayout/master/app/ezgif.com-resize.gif "github")
 
-⬆⬆⬆此处有图片(3.5)加载慢⬆⬆⬆
+⬆⬆⬆此处有图片(3.5M)加载慢⬆⬆⬆
 
 ###  设置分页大小(当服务端返回数量不等于pagesize时不能上拉)
       setPageSize(int pageSize)
