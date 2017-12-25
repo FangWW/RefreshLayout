@@ -70,7 +70,7 @@ public class HeaderRefreshLayout extends AppCompatActivity {
                 getWindow().getDecorView().postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        if (isNoData) {
+                        if (isNoData) {//默认刷新没有数据会切换成空界面
                             postMsgDataRefreshed(null);
                             isNoData = false;
                         } else {
