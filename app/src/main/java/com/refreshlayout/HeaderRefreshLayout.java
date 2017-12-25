@@ -7,11 +7,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -36,27 +37,17 @@ import butterknife.ButterKnife;
  * @Date 6/1/16
  */
 public class HeaderRefreshLayout extends AppCompatActivity {
-    @Bind(R.id.recycleview)
-    RecyclerView recycleview;
-    @Bind(R.id.swiperefreshlayout)
-    SwipeRefreshLayout swiperefreshlayout;
-
     @Bind(R.id.rf_layout)
     RefreshLayoutView mRefreshLayoutView;
 
-    private RecyclerViewAdapter mAdapter = null;
-
-    /**
-     * 请求成功
-     */
-    public static final int REQUEST_SUCCESS = 100;
     private ConvenientBanner adCycleView;
+
+    private boolean isNoData = true;
 
 
     public static void gotoHere(Activity activity) {
         activity.startActivity(new Intent(activity, HeaderRefreshLayout.class));
     }
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,71 +58,83 @@ public class HeaderRefreshLayout extends AppCompatActivity {
         ButterKnife.bind(this);
         ImgRequest.initImgRequest(this);
 
-        swiperefreshlayout.setVisibility(View.GONE);
-
         LinearLayout headerView = (LinearLayout) inflater.inflate(R.layout.layout_head, null);
         initCycleView(headerView);
+        //自定义翻页大小 默认20
         mRefreshLayoutView.setPageSize(10);
         //添加 header
         mRefreshLayoutView.setAdatper(new RefreshLayoutAdapter<List>(this, R.layout.recycleritem_layout, headerView) {
             @Override
             public void onPullDownToRefresh() {
-
                 Log.e("ww", "刷新");
-                final List<List> a = new ArrayList();
-                for (int i = 9; i >= 0; i--) {
-                    a.add(new ArrayList());
-                }
-
                 getWindow().getDecorView().postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        postMsgDataRefreshed(a);
+                        if (isNoData) {
+                            postMsgDataRefreshed(null);
+                            isNoData = false;
+                        } else {
+                            final List<List> a = getData();
+                            //刷新传递数据
+                            postMsgDataRefreshed(a);
+                        }
                     }
-                }, 5500);
+                }, 1500);
             }
 
             /**
-             * 默认十页为分页   如果不是十的倍数就是最后一页
+             * 如果不是十的倍数就是最后一页
              * @param page
              */
             @Override
             public void onPullUpToLoadMore(int page) {
-
                 Log.e("ww", "加载;page=" + page + ";总共数据" + getDatas().size());
-                final List<List> a = new ArrayList();
-                for (int i = 9; i >= 0; i--) {
-                    a.add(new ArrayList());
-                }
+                final List<List> a = getData();
                 getWindow().getDecorView().postDelayed(new Runnable() {
                     @Override
                     public void run() {
+                        //加载传递数据
                         postMsgDataLoadedMore(a);
                     }
-                }, 5500);
+                }, 1500);
             }
 
 
             @Override
             public void onBindViewHolder(ViewHolder holder, List item, int position) {
-
-                holder.getTextView(R.id.tv).setText("   RecyclerView   " + position + "===" + item);
+                holder.getTextView(R.id.tv).setText("   RecyclerView   \n" + position + "===" + item);
             }
         });
 
         getWindow().getDecorView().postDelayed(new Runnable() {
             @Override
             public void run() {
+                //主动刷新
                 mRefreshLayoutView.onRefreshing();
             }
         }, 1);
         mRefreshLayoutView.setEnabledUP(true);
         mRefreshLayoutView.setEnabledDown(true);
 
+        //设置空视图
+        mRefreshLayoutView.setEmptyView(R.drawable.frame_mode_translation_turn_day_16, R.string.no_data);
+        //设置错误视图
+        mRefreshLayoutView.setErrorView(R.drawable.frame_mode_translation_turn_night_18, R.string.error_data);
 
     }
 
+    //模拟数据
+    @NonNull
+    private List<List> getData() {
+        final List<List> a = new ArrayList();
+        for (int i = 9; i >= 0; i--) {
+            a.add(new ArrayList());
+        }
+        return a;
+    }
 
+
+    //初始化头部 banner
     private void initCycleView(View view) {
         ArrayList<String> mImageUrl = null;
         String imageUrl1 = "http://ad.qyer.com/www/images/5ed4abfbadf17f57829d72a7f0b958fd.jpg";
@@ -194,18 +197,28 @@ public class HeaderRefreshLayout extends AppCompatActivity {
         }
     }
 
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        getMenuInflater().inflate(R.menu.menu, menu);
-//        return super.onCreateOptionsMenu(menu);
-//    }
-//
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        int id = item.getItemId();
-//        if (id == R.id.action_share) {
-//            return true;
-//        }
-//        return super.onOptionsItemSelected(item);
-//    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu2, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        switch (id) {
+            case R.id.menu_error://错误
+                mRefreshLayoutView.showErrorView();
+                break;
+            case R.id.menu_null://没有数据
+                mRefreshLayoutView.showEmptyView();
+                break;
+            case R.id.menu_data://正确
+                mRefreshLayoutView.showConetntView();
+                break;
+            default:
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 }

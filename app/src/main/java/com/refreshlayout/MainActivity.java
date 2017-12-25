@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             /**
-             * 默认十页为分页   如果不是十的倍数就是最后一页
+             * 如果不是十的倍数就是最后一页
              * @param page
              */
             @Override
@@ -80,10 +80,12 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         mRefreshLayoutView.setAdatper(mRefreshLayoutAdapter);
+        //自定义翻页大小 默认20
         mRefreshLayoutView.setPageSize(10);
         getWindow().getDecorView().postDelayed(new Runnable() {
             @Override
             public void run() {
+                //主动刷新
                 mRefreshLayoutView.onRefreshing();
             }
         }, 1);
@@ -91,6 +93,12 @@ public class MainActivity extends AppCompatActivity {
         mRefreshLayoutView.setEnabledDown(true);
     }
 
+    /**
+     * 请求列表 id
+     *
+     * @param id
+     * @param isRefresh
+     */
     private void getOneListData(String id, final boolean isRefresh) {
         Request request = new Request.Builder()
                 .url(String.format(IConfig.ONE_PICTURE_URL, id))
@@ -120,6 +128,12 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * 得到列表id的详情
+     *
+     * @param datas
+     * @param isRefresh
+     */
     private void getOneDetails(final List<String> datas, final boolean isRefresh) {
         okHttpClient = new OkHttpClient();
         Request request = new Request.Builder()
@@ -145,8 +159,10 @@ public class MainActivity extends AppCompatActivity {
                     }
                     if (datas.size() == 1) {
                         if (isRefresh) {
+                            //刷新传递数据
                             mRefreshLayoutAdapter.postMsgDataRefreshed(new ArrayList<>(mReadShareDatas));
                         } else {
+                            //加载传递数据
                             mRefreshLayoutAdapter.postMsgDataLoadedMore(new ArrayList<>(mReadShareDatas));
                         }
                         mReadShareDatas.clear();

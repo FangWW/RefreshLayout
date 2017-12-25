@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">RefreshLayout</string>
+    <string name="no_data">演示没有数据的界面,下拉加载数据</string>
+    <string name="error_data">演示错误的界面,下拉加载数据</string>
 </resources>

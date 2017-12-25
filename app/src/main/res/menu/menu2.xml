@@ -1,0 +1,19 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context="com.youyulx.travel.activity.travel.PackageTourInfoActivity">
+
+    <item
+        android:id="@+id/menu_error"
+        android:title="展示错误视图"
+        app:showAsAction="collapseActionView"/>
+    <item
+        android:id="@+id/menu_null"
+        android:title="展示空视图"
+        app:showAsAction="collapseActionView"/>
+
+    <item
+        android:id="@+id/menu_data"
+        android:title="切换正常视图"
+        app:showAsAction="collapseActionView"/>
+</menu>
