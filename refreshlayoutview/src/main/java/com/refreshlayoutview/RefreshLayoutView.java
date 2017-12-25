@@ -151,8 +151,6 @@ public class RefreshLayoutView extends SwipeRefreshLayout implements OnPullListe
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             private int mCurrentState = RecyclerView.SCROLL_STATE_IDLE;
 
-            private int lastdy = 0;
-
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 if (mCurrentState == RecyclerView.SCROLL_STATE_DRAGGING || mCurrentState == RecyclerView.SCROLL_STATE_SETTLING) {
@@ -173,8 +171,6 @@ public class RefreshLayoutView extends SwipeRefreshLayout implements OnPullListe
                             }
                         }
                     }
-
-                    lastdy = dy;
                 }
                 super.onScrolled(recyclerView, dx, dy);
             }
@@ -297,7 +293,7 @@ public class RefreshLayoutView extends SwipeRefreshLayout implements OnPullListe
     }
 
     public void showErrorView() {
-        mEmptyView.post(new Runnable() {
+        post(new Runnable() {
             @Override
             public void run() {
                 mCurrStateView.removeAllViews();
@@ -310,7 +306,7 @@ public class RefreshLayoutView extends SwipeRefreshLayout implements OnPullListe
     }
 
     public void showEmptyView() {
-        mEmptyView.post(new Runnable() {
+        post(new Runnable() {
             @Override
             public void run() {
                 mCurrStateView.removeAllViews();
@@ -323,8 +319,12 @@ public class RefreshLayoutView extends SwipeRefreshLayout implements OnPullListe
     }
 
     public void showConetntView() {
-        mCurrStateView.setVisibility(GONE);
-        mRecyclerView.setVisibility(VISIBLE);
+        if (mCurrStateView.getVisibility() != GONE) {
+            mCurrStateView.setVisibility(GONE);
+        }
+        if (mRecyclerView.getVisibility() != VISIBLE) {
+            mRecyclerView.setVisibility(VISIBLE);
+        }
     }
 
     private View initErrorView() {
