@@ -7,8 +7,8 @@ RecyclerView SwipeRefreshLayout下拉刷新上拉更多 + 简写万能adapter + 
 
 使用该项目app：[Mind:提高专注度](https://www.coolapk.com/apk/146583)
 
-###  使用方式
-    compile 'com.w.support:refreshlayout-view:1.0'
+###  使用方式 
+    compile 'com.w.support:refreshlayout-view:1.0'  (暂时没有上传jcenter最新版)
     
 ###  XML
     <com.refreshlayoutview.RefreshLayoutView
