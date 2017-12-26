@@ -5,7 +5,7 @@ RecyclerView SwipeRefreshLayout下拉刷新上拉更多 + 简写万能adapter + 
 
 增加完整demo演示。数据来源 ONE api。
 
-使用该项目app:[Mind:提高专注度](https://www.coolapk.com/apk/146583)
+使用该项目app：[Mind:提高专注度](https://www.coolapk.com/apk/146583)
 
 ###  使用方式
     compile 'com.w.support:refreshlayout-view:1.0'
